@@ -129,32 +129,37 @@ bool Adafruit_BNO08x::begin_UART(HardwareSerial *serial, int32_t sensor_id) {
  *            The user-defined ID to differentiate different sensors
  *    @return true if initialization was successful, otherwise false.
  */
-bool Adafruit_BNO08x::begin_SPI(uint8_t cs_pin, uint8_t int_pin,
+bool Adafruit_BNO08x::begin_SPI(int8_t cs_pin, int8_t int_pin,
+								int8_t miso_pin, int8_t mosi_pin, int8_t sck_pin,
                                 SPIClass *theSPI, int32_t sensor_id) {
-  i2c_dev = NULL;
+	i2c_dev = NULL;
 
-  _int_pin = int_pin;
-  pinMode(_int_pin, INPUT_PULLUP);
+	_int_pin = int_pin;
+	pinMode(_int_pin, INPUT_PULLUP);
 
-  if (spi_dev) {
-    delete spi_dev; // remove old interface
-  }
-  spi_dev = new Adafruit_SPIDevice(cs_pin,
-                                   1000000,               // frequency
-                                   SPI_BITORDER_MSBFIRST, // bit order
-                                   SPI_MODE3,             // data mode
-                                   theSPI);
-  if (!spi_dev->begin()) {
-    return false;
-  }
+	if (spi_dev) {
+		delete spi_dev; // remove old interface
+	}
 
-  _HAL.open = spihal_open;
-  _HAL.close = spihal_close;
-  _HAL.read = spihal_read;
-  _HAL.write = spihal_write;
-  _HAL.getTimeUs = hal_getTimeUs;
+	spi_dev = new Adafruit_SPIDevice(cs_pin, sck_pin, miso_pin, mosi_pin,
+									 1000000,               // frequency
+									 SPI_BITORDER_MSBFIRST, // bit order
+									 SPI_MODE3,             // data mode
+									 theSPI);
 
-  return _init(sensor_id);
+	if(!spi_dev->begin()) {
+		return false;
+	}
+
+	_HAL.open = spihal_open;
+	_HAL.close = spihal_close;
+	_HAL.read = spihal_read;
+	_HAL.write = spihal_write;
+	_HAL.getTimeUs = hal_getTimeUs;
+
+
+
+	return _init(sensor_id);
 }
 
 /*!  @brief Initializer for post i2c/spi init
@@ -165,12 +170,14 @@ bool Adafruit_BNO08x::_init(int32_t sensor_id) {
   int status;
 
   hardwareReset();
+  Serial.println("HW resetted");
 
   // Open SH2 interface (also registers non-sensor event handler.)
   status = sh2_open(&_HAL, hal_callback, NULL);
   if (status != SH2_OK) {
     return false;
   }
+  Serial.println("SH2 Interface open");
 
   // Check connection partially by getting the product id's
   memset(&prodIds, 0, sizeof(prodIds));
@@ -178,6 +185,7 @@ bool Adafruit_BNO08x::_init(int32_t sensor_id) {
   if (status != SH2_OK) {
     return false;
   }
+  Serial.println("Sensor connection checked");
 
   // Register sensor listener
   sh2_setSensorCallback(sensorHandler, NULL);

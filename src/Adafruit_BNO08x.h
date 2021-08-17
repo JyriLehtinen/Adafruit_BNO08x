@@ -46,8 +46,9 @@ public:
                  TwoWire *wire = &Wire, int32_t sensor_id = 0);
   bool begin_UART(HardwareSerial *serial, int32_t sensor_id = 0);
 
-  bool begin_SPI(uint8_t cs_pin, uint8_t int_pin, SPIClass *theSPI = &SPI,
-                 int32_t sensor_id = 0);
+  bool begin_SPI(int8_t cs_pin, int8_t int_pin, 
+				 int8_t miso_pin =-1, int8_t mosi_pin=-1, int8_t sck_pin=-1,
+                 SPIClass *theSPI = &SPI, int32_t sensor_id = 0);
 
   void hardwareReset(void);
   bool wasReset(void);
