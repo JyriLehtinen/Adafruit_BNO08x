@@ -170,14 +170,12 @@ bool Adafruit_BNO08x::_init(int32_t sensor_id) {
   int status;
 
   hardwareReset();
-  Serial.println("HW resetted");
 
   // Open SH2 interface (also registers non-sensor event handler.)
   status = sh2_open(&_HAL, hal_callback, NULL);
   if (status != SH2_OK) {
     return false;
   }
-  Serial.println("SH2 Interface open");
 
   // Check connection partially by getting the product id's
   memset(&prodIds, 0, sizeof(prodIds));
@@ -185,7 +183,6 @@ bool Adafruit_BNO08x::_init(int32_t sensor_id) {
   if (status != SH2_OK) {
     return false;
   }
-  Serial.println("Sensor connection checked");
 
   // Register sensor listener
   sh2_setSensorCallback(sensorHandler, NULL);
